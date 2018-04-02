@@ -21,32 +21,30 @@ static void signal_handler(__attribute__((unused)) int signum)
 
 static int get_netlink_socket()
 {
-    int ret = -1;
-    int nl_socket = -1;
     struct sockaddr_nl src_addr = {0};
 
     src_addr.nl_family = AF_NETLINK;
     src_addr.nl_pid = getpid();
     src_addr.nl_groups = -1;
 
-    nl_socket = socket(AF_NETLINK, SOCK_RAW, NETLINK_KOBJECT_UEVENT);
-    if (nl_socket < 0) {
-        perror("socket()");
+    // NETLINK_KOBJECT_UEVENT: Get kernel messages to user space
+    int netlink_socket = socket(AF_NETLINK, SOCK_RAW, NETLINK_KOBJECT_UEVENT);
+    if (netlink_socket < 0) {
+        perror("socket");
         return -1;
     }
 
-    ret = bind(nl_socket, (struct sockaddr *)&src_addr, sizeof(struct sockaddr_nl));
-    if (ret == -1) {
-        perror("bind()");
-        close(nl_socket);
+    if (bind(netlink_socket, (struct sockaddr *)&src_addr, sizeof(struct sockaddr_nl)) == -1) {
+        perror("bind");
+        close(netlink_socket);
         return -1;
     }
 
-    return nl_socket;
+    return netlink_socket;
 }
 
 
-static int receive_netlink_msg(int nl_socket)
+static int receive_netlink_msg(int netlink_socket)
 {
     int ret = -1;
     struct pollfd fds[1] = {0};
@@ -54,7 +52,7 @@ static int receive_netlink_msg(int nl_socket)
     ssize_t size_read = 0;
 
     // set the poll on the netlink socket
-    fds[0].fd = nl_socket;
+    fds[0].fd = netlink_socket;
     fds[0].events = POLLIN;
 
     printf("Waiting for events ...\n");
@@ -63,13 +61,13 @@ static int receive_netlink_msg(int nl_socket)
         ret = poll(fds, 1, -1);
         if (ret == -1) {
             perror("poll()");
-            close(nl_socket);
+            close(netlink_socket);
             return -1;
         }
 
         if (fds[0].revents & POLLIN) {
             // TODO: replace recv by recvmsg
-            size_read = recv(nl_socket, msg, sizeof(msg), MSG_DONTWAIT);
+            size_read = recv(netlink_socket, msg, sizeof(msg), MSG_DONTWAIT);
             printf("size_read:%ld msg:%s\n", size_read, msg);
         }
 
@@ -81,23 +79,23 @@ static int receive_netlink_msg(int nl_socket)
 
 static int entry()
 {
-    int ret = -1;
+    // set ctrl-c signal handler to exit the loop properly
     struct sigaction action = {0};
-    int nl_socket = -1;
 
     action.sa_handler = signal_handler;
-    ret = sigaction(SIGINT, &action, NULL);
-    if (ret == -1) {
-        perror("sigaction()");
+    if (sigaction(SIGINT, &action, NULL) == -1) {
+        perror("sigaction");
         return -1;
     }
 
-    nl_socket = get_netlink_socket();
-    if (nl_socket == -1)
+    // retrive netlink_socket
+    int netlink_socket = get_netlink_socket();
+    if (netlink_socket == -1)
         return -1;
-    nl_socket_save = nl_socket;
+    nl_socket_save = netlink_socket;
 
-    receive_netlink_msg(nl_socket);
+    // receive msg on the netlink_socket
+    receive_netlink_msg(netlink_socket);
 
     return 0;
 }
