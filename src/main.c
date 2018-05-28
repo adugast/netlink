@@ -69,6 +69,7 @@ static int read_netlink_socket(int netlink_socket)
 
         /* Continue here  with parsing payload. */
         /* ... */
+        printf("Received message payload: %s\n", (char *)NLMSG_DATA(nh));
 
         nh = NLMSG_NEXT(nh, len);
     }
