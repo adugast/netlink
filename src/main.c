@@ -1,98 +1,23 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <signal.h>
-#include <sys/socket.h>
-#include <sys/poll.h>
-#include <linux/netlink.h>
+
+#include "netlink.h"
 
 
-static int nl_socket_save = -1;
+static nl_t *nl_hdl_g = NULL;
 static void signal_handler(__attribute__((unused)) int signum)
 {
-    printf("Netlink socket[%d]:closed\n", nl_socket_save);
-    close(nl_socket_save);
+    nl_deinit_handler(nl_hdl_g);
+    printf("Netlink handler cleaned-up\n");
     exit(EXIT_SUCCESS);
 }
 
 
-static int get_netlink_socket()
+static void nl_reader_cb(ssize_t msglen, char *msg, void *ctx)
 {
-    int netlink_socket = socket(AF_NETLINK, SOCK_RAW, NETLINK_KOBJECT_UEVENT);
-    if (netlink_socket == -1)
-        goto cleanup;
-
-    struct sockaddr_nl addr = {
-        .nl_family = AF_NETLINK,
-        .nl_pid = getpid(),
-        .nl_groups = -1
-    };
-
-    if (bind(netlink_socket, (struct sockaddr *)&addr, sizeof(struct sockaddr_nl)) == -1)
-        goto cleanup_socket;
-
-    return netlink_socket;
-
-cleanup_socket:
-    close(netlink_socket);
-cleanup:
-    return -1;
-}
-
-
-static int read_netlink_socket(int netlink_socket)
-{
-    char buf[4096] = {0};
-    struct sockaddr_nl sa;
-
-    struct iovec iov = {
-        .iov_base = buf,
-        .iov_len = sizeof(buf)
-    };
-
-    struct msghdr msg = {
-        .msg_name = &sa,
-        .msg_namelen = sizeof(sa),
-        .msg_iov = &iov,
-        .msg_iovlen = 1,
-        .msg_control = NULL,
-        .msg_controllen = 0,
-        .msg_flags = 0
-    };
-
-    ssize_t len = recvmsg(netlink_socket, &msg, 0);
-    if (len == -1) {
-        perror("recvmsg");
-        return -1;
-    }
-
-    printf("%s\n", buf);
-
-    return 0;
-}
-
-
-static int set_poll_trigger(int netlink_socket)
-{
-    struct pollfd pfd = {
-        .fd = netlink_socket,
-        .events = POLLIN,
-    };
-
-    printf("Waiting for events ...\n");
-    while (1) {
-
-        if (poll(&pfd, 1, -1) == -1) {
-            perror("poll");
-            close(netlink_socket);
-            return -1;
-        }
-
-        if (pfd.revents & POLLIN)
-            read_netlink_socket(netlink_socket);
-    }
-
-    return 0;
+    ctx = ctx;
+    printf("msglen[%ld]:[%s]\n", msglen, msg);
 }
 
 
@@ -107,12 +32,15 @@ int main()
         return -1;
     }
 
-    int netlink_socket = get_netlink_socket();
-    if (netlink_socket == -1)
+    nl_t *hdl = nl_init_handler(nl_reader_cb, 4096, NULL);
+    if (!hdl) {
+        printf("nl_init_handler failed\n");
         return -1;
-    nl_socket_save = netlink_socket;
+    }
+    nl_hdl_g = hdl;
 
-    set_poll_trigger(netlink_socket);
+    // blocking call, waiting for netlink event
+    nl_launch_listener(hdl);
 
     return 0;
 }

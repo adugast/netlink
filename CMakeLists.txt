@@ -13,4 +13,5 @@ set(CMAKE_C_FLAGS "-W -Wall -pedantic -std=c99 -std=gnu99")
 add_executable(
     netlink
     src/main.c
+    src/netlink.c
 )
