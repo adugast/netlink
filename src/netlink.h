@@ -37,7 +37,7 @@ nl_t *nl_init_handler(nl_reader_cb_t cb, ssize_t buffer_size, void *ctx);
 
 
 /*!
- * \brief Launch a netlink listener over the handler
+ * \brief   Launch a netlink listener over the handler
  *
  * Launch poll loop over a netlink socket that waits for events.
  * When a netlink message is received, the nl_reader_cb_t callback is triggered
@@ -50,9 +50,9 @@ int nl_launch_listener(nl_t *hdl);
 
 
 /*!
- * \brief  Delete a netlink handler
+ * \brief   Delete a netlink handler
  *
- * \param  hdl IN  netlink handler to free
+ * \param   hdl IN  netlink handler to free
  */
 void nl_deinit_handler(nl_t *hdl);
 
