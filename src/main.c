@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+<<<<<<< HEAD
 #include <unistd.h>
 #include <signal.h>
 #include <sys/socket.h>
@@ -15,10 +16,23 @@ static void signal_handler(__attribute__((unused)) int signum)
 {
     printf("\nnetlink_socket[%d]:closed\n", nl_socket_save);
     close(nl_socket_save);
+=======
+#include <signal.h>
+
+#include "netlink.h"
+
+
+static nl_t *nl_hdl_g = NULL;
+static void signal_handler(__attribute__((unused)) int signum)
+{
+    nl_deinit_handler(nl_hdl_g);
+    printf("Netlink handler cleaned-up\n");
+>>>>>>> 073fc2cbe89c33af0dd9e51aa8450d60b8c57608
     exit(EXIT_SUCCESS);
 }
 
 
+<<<<<<< HEAD
 static int get_netlink_socket()
 {
     struct sockaddr_nl src_addr = {0};
@@ -120,11 +134,27 @@ static int entry()
     struct sigaction action;
 
     action.sa_handler = signal_handler;
+=======
+static void nl_reader_cb(ssize_t msglen, char *msg, void *ctx)
+{
+    ctx = ctx;
+    printf("msglen[%ld]:[%s]\n", msglen, msg);
+}
+
+
+int main()
+{
+    struct sigaction action = {
+        .sa_handler = signal_handler,
+    };
+
+>>>>>>> 073fc2cbe89c33af0dd9e51aa8450d60b8c57608
     if (sigaction(SIGINT, &action, NULL) == -1) {
         perror("sigaction");
         return -1;
     }
 
+<<<<<<< HEAD
     // retrive netlink_socket
     int netlink_socket = get_netlink_socket();
     if (netlink_socket == -1)
@@ -142,6 +172,18 @@ static int entry()
 int main()
 {
     entry();
+=======
+    nl_t *hdl = nl_init_handler(nl_reader_cb, 4096, NULL);
+    if (!hdl) {
+        printf("nl_init_handler failed\n");
+        return -1;
+    }
+    nl_hdl_g = hdl;
+
+    // blocking call, waiting for netlink event
+    nl_launch_listener(hdl);
+
+>>>>>>> 073fc2cbe89c33af0dd9e51aa8450d60b8c57608
     return 0;
 }
 
