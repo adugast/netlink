@@ -83,20 +83,23 @@ nl_t *nl_init_handler(nl_reader_cb_t cb, ssize_t buffer_size, void *ctx)
     if (!hdl)
         goto end;
 
-    hdl->nl_sock = _nl_get_socket();
-    if (hdl->nl_sock == -1)
-        goto clean;
-
-    hdl->buffer_size = buffer_size;
     hdl->buffer = calloc(buffer_size, sizeof(char));
     if (!hdl->buffer)
-        goto clean;
+        goto clean_hdl;
+
+    hdl->nl_sock = _nl_get_socket();
+    if (hdl->nl_sock == -1)
+        goto clean_buffer;
+
+    hdl->buffer_size = buffer_size;
     hdl->cb = cb;
     hdl->ctx = ctx;
 
     return hdl;
 
-clean:
+clean_buffer:
+    free(hdl->buffer);
+clean_hdl:
     free(hdl);
 end:
     return NULL;
