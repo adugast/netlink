@@ -38,8 +38,8 @@ typedef struct nl nl_t;
  *
  * This callback will be triggered when a NETLINK_KOBJECT_UEVENT msg is received
  *
- * \param   msglen  OUT     size of the message received
- * \param   msg     OUT     netlink message received
+ * \param   msglen  IN     size of the message received
+ * \param   msg     IN     netlink message received
  */
 typedef void (*nl_reader_cb_t)(ssize_t msglen, char *msg, void *ctx);
 
