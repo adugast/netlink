@@ -26,9 +26,10 @@ Finally, use make to compile the sources and so generate the binary (still from 
 $>make
 ```
 
-## API:
+## API Description (netlink.h content):
 
 ```
+/*! Opaque type for the netlink handler */
 typedef struct nl nl_t;
 
 
@@ -83,7 +84,7 @@ Launch netlink:
 $>./netlink
 ```
 
-## Example Output:
+## Example Output (USB plugged-in):
 
 ```
 Cli>./netlink
@@ -107,6 +108,7 @@ msglen[146]:[libudev]
 msglen[123]:[libudev]
 msglen[76]:[add@/module/uas]
 msglen[95]:[add@/bus/usb/drivers/uas]
+...
 ```
 
 ## More info:
