@@ -20,7 +20,7 @@ typedef struct nl nl_t;
  * \param   msglen  IN     size of the message received
  * \param   msg     IN     netlink message received
  */
-typedef void (*nl_reader_cb_t)(ssize_t msglen, char *msg, void *ctx);
+typedef void (*nl_reader_cb_t)(unsigned int msglen, char *msg, void *ctx);
 
 
 /*!
@@ -33,7 +33,7 @@ typedef void (*nl_reader_cb_t)(ssize_t msglen, char *msg, void *ctx);
  *
  * \return  netlink handler in case of success, NULL in case of error
  */
-nl_t *nl_init_handler(nl_reader_cb_t cb, ssize_t buffer_size, void *ctx);
+nl_t *nl_init_handler(nl_reader_cb_t cb, unsigned int buffer_size, void *ctx);
 
 
 /*!

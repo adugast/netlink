@@ -11,7 +11,7 @@
 
 struct nl {
     int nl_sock;
-    ssize_t buffer_size;
+    unsigned int buffer_size;
     char *buffer;
     nl_reader_cb_t cb;
     void *ctx;
@@ -74,7 +74,7 @@ static int _nl_read_socket(nl_t *hdl)
 }
 
 
-nl_t *nl_init_handler(nl_reader_cb_t cb, ssize_t buffer_size, void *ctx)
+nl_t *nl_init_handler(nl_reader_cb_t cb, unsigned int buffer_size, void *ctx)
 {
     if (!cb)
         goto end;

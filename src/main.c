@@ -14,10 +14,10 @@ static void signal_handler(__attribute__((unused)) int signum)
 }
 
 
-static void nl_reader_cb(ssize_t msglen, char *msg, void *ctx)
+static void nl_reader_cb(unsigned int msglen, char *msg, void *ctx)
 {
     ctx = ctx;
-    printf("msglen[%ld]:[%s]\n", msglen, msg);
+    printf("msglen[%d]:[%s]\n", msglen, msg);
 }
 
 
