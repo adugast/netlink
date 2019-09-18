@@ -2,7 +2,9 @@
 
 ## Introduction
 
-Netlink is a netlink API.
+The Netlink socket family is a Linux kernel interface used for inter-process communication (IPC) between both the kernel and userspace processes, and between different userspace processes.
+
+My netlink API project aims to provides functions to manipulates netlink connections/messages easier.
 
 ## Setting up netlink example
 
