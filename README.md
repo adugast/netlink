@@ -8,7 +8,7 @@ Netlink is a netlink API.
 
 Clone the project to retrieve the sources:
 ```
-$>git clone https://github.com/pestbuns/netlink.git
+$>git clone https://github.com/adugast/netlink.git
 ```
 
 Go in the build directory of netlink:
